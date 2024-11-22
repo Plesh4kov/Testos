@@ -1,65 +1,44 @@
-<div id="wallet-container">
-  <h1>Wallet Balance</h1>
-  <div id="wallet-balance">Loading balance...</div>
-</div>
+// Ожидание загрузки DOM перед выполнением кода
+document.addEventListener("DOMContentLoaded", () => {
+  const walletAddress = "3HMkAtzMwjH9mVZwR6rgGL6f2P5z7BswAx4FnqEcubWp"; // Адрес кошелька
 
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background: #f9f9f9;
-  }
-
-  #wallet-container {
-    text-align: center;
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  #wallet-container h1 {
-    margin-bottom: 10px;
-    color: #333;
-    font-size: 24px;
-  }
-
-  #wallet-balance {
-    font-size: 20px;
-    color: #007acc;
-    font-weight: bold;
-    margin-top: 10px;
-  }
-</style>
-
-<script>
-  const walletAddress = "ВАШ_АДРЕС"; // Замените на адрес вашего кошелька
-
+  // Запрос к API для получения баланса кошелька
   fetch(`https://public-api.solscan.io/account?address=${walletAddress}`, {
     headers: {
       Accept: "application/json",
     },
   })
     .then((response) => {
+      // Проверка, что запрос был успешным
       if (!response.ok) {
         throw new Error("Failed to fetch wallet balance");
       }
       return response.json();
     })
     .then((data) => {
+      // Проверка данных и преобразование баланса из lamports в SOL
       if (data && data.lamports) {
-        const balance = data.lamports / 1000000000; // Преобразуем lamports в SOL
-        document.getElementById("wallet-balance").innerText = `Balance: ${balance.toFixed(2)} SOL`;
+        const balance = data.lamports / 1000000000; // Преобразование lamports в SOL
+        const balanceElement = document.getElementById("wallet-balance");
+
+        // Обновление текста элемента с балансом
+        if (balanceElement) {
+          balanceElement.innerText = `Balance: ${balance.toFixed(2)} SOL`;
+        }
       } else {
-        document.getElementById("wallet-balance").innerText = "Balance not found.";
+        // Если данных нет, отобразить сообщение об отсутствии баланса
+        const balanceElement = document.getElementById("wallet-balance");
+        if (balanceElement) {
+          balanceElement.innerText = "Balance not found.";
+        }
       }
     })
     .catch((error) => {
+      // Обработка ошибок и вывод сообщения
       console.error("Error fetching balance:", error);
-      document.getElementById("wallet-balance").innerText = "Error loading balance.";
+      const balanceElement = document.getElementById("wallet-balance");
+      if (balanceElement) {
+        balanceElement.innerText = "Error loading balance.";
+      }
     });
-</script>
+});
