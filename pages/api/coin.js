@@ -1,18 +1,12 @@
 export default async function handler(req, res) {
-  const coinAddress = "GRUmPYbiTpq9ZPy5LAqBMMze7kErf5dEX2i9qYfwoSmR";
+  const coinAddress = "GRUmPYbiTpq9ZPy5LAqBMMze7kErf5dEX2i9qYfwoSmR"; // Адрес монеты
+  const url = `https://public-api.solscan.io/token/meta?address=${coinAddress}`;
 
   try {
-    const response = await fetch("https://api.mainnet-beta.solana.com", {
-      method: "POST",
+    const response = await fetch(url, {
       headers: {
-        "Content-Type": "application/json",
+        Accept: "application/json",
       },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "getTokenSupply",
-        params: [coinAddress],
-      }),
     });
 
     if (!response.ok) {
@@ -20,18 +14,24 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    console.log("Solana API Response:", data); // Лог ответа
 
-    if (data && data.result) {
+    if (data) {
+      const price = data?.price?.usd ?? "N/A";
+      const marketCap = data?.market_cap ?? "N/A";
+      const currentSupply = data?.circulating_supply ?? "N/A";
+      const holders = data?.holder_count ?? "N/A";
+
       res.status(200).json({
-        supply: data.result.value.amount,
-        decimals: data.result.value.decimals,
+        price,
+        marketCap,
+        currentSupply,
+        holders,
       });
     } else {
-      res.status(404).json({ error: "Token data not found" });
+      res.status(404).json({ error: "Coin data not found" });
     }
   } catch (error) {
-    console.error("Error fetching token data:", error.message);
-    res.status(500).json({ error: "Failed to fetch token data" });
+    console.error("Error fetching coin data:", error.message);
+    res.status(500).json({ error: "Failed to fetch coin data" });
   }
 }
