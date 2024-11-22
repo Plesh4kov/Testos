@@ -1,18 +1,22 @@
-import axios from "axios";
-
 export default async function handler(req, res) {
   const coinAddress = "GRUmPYbiTpq9ZPy5LAqBMMze7kErf5dEX2i9qYfwoSmR";
   const url = `https://public-api.solscan.io/token/meta?address=${coinAddress}`;
 
   try {
-    const response = await axios.get(url, {
+    const response = await fetch(url, {
       headers: {
         Accept: "application/json",
       },
     });
 
-    if (response.status === 200 && response.data) {
-      const { price, market_cap, circulating_supply, holder_count, last_buy } = response.data;
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data) {
+      const { price, market_cap, circulating_supply, holder_count, last_buy } = data;
 
       res.status(200).json({
         price: price?.usd ?? "N/A",
